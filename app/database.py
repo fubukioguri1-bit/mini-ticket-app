@@ -18,7 +18,11 @@ def init_db() -> None:
                 title TEXT NOT NULL,
                 assignee TEXT NOT NULL,
                 status TEXT NOT NULL DEFAULT 'TODO',
+                priority TEXT NOT NULL DEFAULT 'LOW',
                 created_at TEXT NOT NULL
             )
         """)
+        columns = [row["name"] for row in conn.execute("PRAGMA table_info(tickets)").fetchall()]
+        if "priority" not in columns:
+            conn.execute("ALTER TABLE tickets ADD COLUMN priority TEXT NOT NULL DEFAULT 'LOW'")
         conn.commit()
