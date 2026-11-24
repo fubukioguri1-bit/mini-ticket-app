@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       const titleInput = /** @type {HTMLInputElement} */ (document.getElementById('title'));
       const assigneeInput = /** @type {HTMLInputElement} */ (document.getElementById('assignee'));
-      const prioritySelect = /** @type {HTMLSelectElement | null} */ (document.getElementById('priority'));
 
       const res = await fetch('/api/tickets', {
         method: 'POST',
@@ -24,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({
           title: titleInput.value,
           assignee: assigneeInput.value,
-          priority: prioritySelect ? prioritySelect.value : 'LOW',
         }),
       });
 
@@ -70,8 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (res.ok) {
         window.location.reload();
       } else {
-        const err = await res.json().catch(() => ({}));
-        alert(err.detail || '削除に失敗しました');
+        alert('削除に失敗しました');
       }
     });
   });
