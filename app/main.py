@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
 
-from app.database import get_connection,init_db
+from app.database import get_connection, init_db
 from app.models import StatusType, TicketCreate, TicketResponse, TicketStatusUpdate
 
 BASE_DIR = Path(__file__).resolve().parents[1]
@@ -44,8 +44,8 @@ def create_ticket(ticket: TicketCreate) -> dict:
     now = datetime.now(timezone.utc).isoformat()
     with get_connection() as conn:
         cursor = conn.execute(
-            "INSERT INTO tickets (title, assignee, status, created_at) VALUES (?, ?, 'TODO', ?)",
-            (ticket.title, ticket.assignee, now),
+            "INSERT INTO tickets (title, assignee, status, priority, created_at) VALUES (?, ?, 'TODO', ?, ?)",
+            (ticket.title, ticket.assignee, ticket.priority, now),
         )
         ticket_id = cursor.lastrowid
         conn.commit()
@@ -80,5 +80,12 @@ def delete_ticket(ticket_id: int) -> None:
         row = conn.execute("SELECT * FROM tickets WHERE id = ?", (ticket_id,)).fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Ticket not found")
+
+        # SPEC 3.3 / 3.4: priority が HIGH のチケットは削除禁止
+        if row["priority"] == "HIGH":
+            raise HTTPException(
+                status_code=400, detail="priorityがHIGHのチケットは削除できません"
+            )
+
         conn.execute("DELETE FROM tickets WHERE id = ?", (ticket_id,))
         conn.commit()

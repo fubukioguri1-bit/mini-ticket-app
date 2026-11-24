@@ -3,52 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <title>簡易チケット管理</title>
-  <style>
-    body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
-    .form-group { margin-bottom: 1rem; display: flex; gap: 0.5rem; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
-    .filters { margin: 1rem 0; }
-    .error { color: red; margin-bottom: 0.5rem; }
-  </style>
 </head>
 <body>
   <h1>簡易チケット管理</h1>
 
-  <!-- 新規登録フォーム -->
-  <div id="error-msg" class="error"></div>
-  <form id="create-form" class="form-group">
-    <input type="text" id="title" placeholder="チケット件名 (100文字以内)" required>
-    <input type="text" id="assignee" placeholder="担当者 (50文字以内)" required>
+  <form id="create-form">
+    <input type="text" id="title" name="title" placeholder="件名" required maxlength="100">
+    <input type="text" id="assignee" name="assignee" placeholder="担当者" required maxlength="50">
+    <select id="priority" name="priority">
+      <option value="LOW" selected>LOW</option>
+      <option value="MEDIUM">MEDIUM</option>
+      <option value="HIGH">HIGH</option>
+    </select>
     <button type="submit">登録</button>
   </form>
+  <div id="error-msg" style="color: red;"></div>
 
-  <!-- ステータス絞り込み -->
-  <div class="filters">
+  <p>
     絞り込み:
     <a href="/">すべて</a> |
     <a href="/?status=TODO">TODO</a> |
     <a href="/?status=DOING">DOING</a> |
     <a href="/?status=DONE">DONE</a>
-  </div>
+  </p>
 
-  <!-- チケット一覧 -->
-  <table>
+  <table border="1">
     <thead>
       <tr>
         <th>ID</th>
         <th>件名</th>
         <th>担当者</th>
+        <th>優先度</th>
         <th>ステータス</th>
         <th>操作</th>
       </tr>
     </thead>
     <tbody>
       {% for t in tickets %}
-      <tr data-ticket-id="{{ t.id }}">
+      <tr>
         <td>{{ t.id }}</td>
         <td>{{ t.title }}</td>
         <td>{{ t.assignee }}</td>
+        <td>{{ t.priority }}</td>
         <td>
           <select class="status-select" data-ticket-id="{{ t.id }}">
             <option value="TODO" {% if t.status == 'TODO' %}selected{% endif %}>TODO</option>
@@ -57,13 +53,18 @@
           </select>
         </td>
         <td>
-          <button type="button" class="delete-btn" data-ticket-id="{{ t.id }}">削除</button>
+          <button
+            type="button"
+            class="delete-btn"
+            data-ticket-id="{{ t.id }}"
+            {% if t.priority == 'HIGH' %}disabled title="HIGH優先度のチケットは削除できません"{% endif %}
+          >削除</button>
         </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 
-  <script src="../static/app.js" defer></script>
+  <script src="/static/app.js"></script>
 </body>
 </html>
